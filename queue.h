@@ -1,4 +1,7 @@
 class Queue {
+    public:
+
+    Queue();
     void enqueue (void *);
     void * dequeue ();
 
@@ -11,4 +14,4 @@ class Queue {
 
     queue * head;
     queue * tail;
-}
+};

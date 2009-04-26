@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include "queue.h"
 
 Queue::Queue() {
@@ -6,5 +7,19 @@ Queue::Queue() {
 }
 
 void Queue::enqueue (void * obj) {
-    head = new queue
+    if (head == NULL) {
+        head = tail = new queue;
+    } else {
+        tail->next = new queue;
+        tail = tail->next;
+    }
+
+    tail->obj = obj;
+    tail->next = NULL;
+}
+
+void * Queue::dequeue () {
+    void * ret = head->obj;
+    head = head->next;
+    return ret;
 }
