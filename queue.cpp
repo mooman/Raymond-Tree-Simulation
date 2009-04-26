@@ -1,5 +1,6 @@
-#include <cstdlib>
 #include "queue.h"
+
+#define NULL 0x0
 
 Queue::Queue() {
     head = NULL;

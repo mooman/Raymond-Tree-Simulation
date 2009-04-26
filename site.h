@@ -1,7 +1,13 @@
 class Site {
-    void receive ();
-    void
+    public:
+        Site();
+
+        int get_id ();
+
+        void request ();
+        void accept_request ();
 
     private:
-        Site * holder;
+        int id;
+        int holder;
 }
