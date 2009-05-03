@@ -1,6 +1,7 @@
 class Event {
     public:
         Event(string);
+        Event(int, int, int);
 
         int get_time ();
         int get_site ();

@@ -7,6 +7,12 @@ Event::Event(string line) {
     parse(line);
 }
 
+Event::Event(int t, int s, int a) {
+    time = t;
+    site = s;
+    action = a;
+}
+
 //accessors
 int Event::get_time () {
     return time;
