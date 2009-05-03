@@ -3,6 +3,7 @@ class Queue {
         Queue();
         void enqueue (void *);
         void * dequeue ();
+        bool empty ();
 
     private:
         struct queue {

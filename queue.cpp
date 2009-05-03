@@ -23,3 +23,7 @@ void * Queue::dequeue () {
     head = head->next;
     return ret;
 }
+
+bool Queue::empty () {
+    head == NULL
+}
