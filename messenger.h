@@ -10,5 +10,7 @@ class Messenger {
         int * weighted_delays;
         const int wd_size;
 
-        int compute_delivery_time ();
+        Simulator * s;
+
+        int compute_delivery_delay ();
 };
