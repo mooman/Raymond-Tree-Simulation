@@ -1,3 +1,9 @@
+#ifndef SIMULATORH
+#define SIMULATORH
+
+//forward declaration
+class Messenger;
+
 class Simulator {
     public:
         Simulator (int, int);
@@ -15,3 +21,5 @@ class Simulator {
         int max_time;
         int current_time;
 };
+
+#endif

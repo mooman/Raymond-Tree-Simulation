@@ -1,6 +1,7 @@
 #include "main.h"
 #include "queue.h"
 #include "event.h"
+#include "messenger.h"
 #include "simulator.h"
 
 Simulator::Simulator (int ns, int mt) {
@@ -12,7 +13,7 @@ Simulator::Simulator (int ns, int mt) {
     m = new Messenger(this);
 }
 
-void Simulator::get_current_time () {
+int Simulator::get_current_time () {
     return current_time;
 }
 

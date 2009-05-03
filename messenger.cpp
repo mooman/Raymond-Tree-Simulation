@@ -1,5 +1,6 @@
 #include "main.h"
 #include "queue.h"
+#include "simulator.h"
 #include "messenger.h"
 
 Messenger::Messenger (Simulator * s):
@@ -31,5 +32,5 @@ int Messenger::compute_delivery_delay () {
     }
 
     //program should die if this happens
-    exit 1;
+    exit(1);
 }

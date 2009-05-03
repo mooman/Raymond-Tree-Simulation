@@ -1,6 +1,12 @@
+#ifndef MESSENGERH
+#define MESSENGERH
+
+//foward declaration
+class Simulator;
+
 class Messenger {
     public:
-        Messenger(int);
+        Messenger(Simulator *);
 
         //send message to site
         void send (int, int);
@@ -14,3 +20,5 @@ class Messenger {
 
         int compute_delivery_delay ();
 };
+
+#endif
