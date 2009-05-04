@@ -1,19 +1,21 @@
 #include "RaymondTree.h"
 #include "site.h"
+#include <iostream>
 #include <cstdlib>
 #include <ctime>
 
+using namespace std;
 // creates a new empty tree
 RaymondTree::RaymondTree()
 {
-	root_site = null;
+	root_site = NULL;
 	tree_size = 0;
 }
 
 // destroy the tree
 RaymondTree::~RaymondTree()
 {
-	if (root_site != null)
+	if (root_site != NULL)
 		delete(root_site);
 }
 
@@ -27,45 +29,43 @@ void RaymondTree::build_tree(int size){
 		return;
 	}
 
+	srand((unsigned)time(0));
 	// generate random IDs for each site based on a seed provided by
 	// the system time
 	for (int i = 0; i < size; i++) {
-		srand((unsigned)time(0));
-		random_number = rand();
-		insert_node(root_site, random_number);
+		random_number = rand() % 50;
+		cout << "DEBUG: node id: " << random_number << endl;
+		root_site = insert_node(root_site, random_number);
 	}
+
+	print_tree(root_site);
 }
 
 // do an insertion into the tree creating
 // something similar to a binary tree
-Site RaymondTree::insert_node(Site* node, int data){
+Site* RaymondTree::insert_node(Site* node, int data){
 	// if it's the first time, input site will
 	// be the root site
-	if (node == null) {
+	if (node == NULL) {
 		node = new Site();
-		node->set_id(data);
-		node->left = null;
-		node->right = null;
-		return s;
+		node->id = data;
+		node->left = NULL;
+		node->right = NULL;
+		return node;
 	}
 
-	// otherwise insert the node in the tree
-	// according to the value of the ID
-	if (data == node->id)
-		data++;
-
 	if (data < node->id ) {
-		node->left = insert_node(dnode->left, data);
+		node->left = insert_node(node->left, data);
 	}
 	else {
 		node->right = insert_node(node->right, data);
 	}
 
-	return s;
+	return node;
 }
 
 // return the root site
-Site& RaymondTree::get_root(){
+Site* RaymondTree::get_root(){
 	return root_site;
 }
 
@@ -75,6 +75,15 @@ void RaymondTree::set_root(Site* s) {
 }
 
 // print the network
-void RaymondTree::print_tree() {
+void RaymondTree::print_tree(Site* node) {
 
+		// post order traversal
+		if (node->left != NULL) {
+			print_tree(node->left);
+		}
+		if (node->right != NULL) {
+			print_tree(node->right);
+		}
+		cout << node->id << " ";
+	return;
 }

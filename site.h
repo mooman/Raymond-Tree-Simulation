@@ -1,12 +1,20 @@
+#ifndef SITE_H_
+#define SITE_H_
+
 class Site {
     public:
+        // constructor
         Site();
-        Site(Messenger *);
 
         int get_id ();
-        void process_event(Event *);
+        void request ();
+        void accept_request ();
+        int id;
+        Site* left;
+        Site* right;
 
     private:
-        int id;
         int holder;
-}
+};
+
+#endif /*SITE_H_*/
