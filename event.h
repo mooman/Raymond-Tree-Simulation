@@ -7,8 +7,6 @@ class Event {
         int get_site ();
         char get_action ();
 
-        void execute ();
-
     private:
         int time;
         int site;

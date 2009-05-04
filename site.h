@@ -1,11 +1,10 @@
 class Site {
     public:
         Site();
+        Site(Messenger *);
 
         int get_id ();
-
-        void request ();
-        void accept_request ();
+        void process_event(Event *);
 
     private:
         int id;

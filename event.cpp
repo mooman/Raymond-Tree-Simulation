@@ -29,6 +29,3 @@ char Event::get_action () {
 void Event::parse (string line) {
     sscanf(line.c_str(), "%d %d %c %d", &time, &site, &action, &compute_duration);
 }
-
-void Event::execute () {
-}
