@@ -9,7 +9,7 @@ class Messenger {
         Messenger(Simulator *);
 
         //send message to site
-        void send (int, int);
+        void send (int, int, int);
 
     private:
         Queue * timeline;

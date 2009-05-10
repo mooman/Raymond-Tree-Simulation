@@ -1,15 +1,22 @@
+#include "main.h"
+#include "queue.h"
+#include "event.h"
+#include "messenger.h"
 #include "RaymondTree.h"
+#include "simulator.h"
 #include "site.h"
-#include <iostream>
-#include <cstdlib>
-#include <ctime>
 
 using namespace std;
 // creates a new empty tree
-RaymondTree::RaymondTree()
+RaymondTree::RaymondTree(Simulator * s, Messenger * m)
 {
+    this->s = s;
+    this->m = m;
+
 	root_site = NULL;
 	tree_size = 0;
+
+    postorder_q = new Queue();
 }
 
 // destroy the tree
@@ -48,17 +55,17 @@ Site* RaymondTree::insert_node(Site* node, int data, Site* p_node){
 	// if it's the first time, input site will
 	// be the root site
 	if (node == NULL) {
-		node = new Site(this);
+		node = new Site(this, this->s, this->m);
 		node->id = data;
 		node->left = NULL;
 		node->right = NULL;
 
 		if (tree_size == 0) {// root node
 			tree_size += 1;
-			node->holder = node; // make it it's own parent
+			node->parent = node; // make it it's own parent
 		}
 
-		node->holder = p_node; // point to the parent site
+		node->parent = p_node; // point to the parent site
 		tree_size++;
 		return node;
 	}
@@ -94,5 +101,20 @@ void RaymondTree::print_tree(Site* node) {
 			print_tree(node->right);
 		}
 		cout << node->id << " ";
+	return;
+}
+
+// construct a post order queue
+void RaymondTree::traverse(Site* node) {
+
+		// post order traversal
+		if (node->left != NULL) {
+			traverse(node->left);
+		}
+		if (node->right != NULL) {
+			traverse(node->right);
+		}
+
+        postorder_q->enqueue(node);
 	return;
 }

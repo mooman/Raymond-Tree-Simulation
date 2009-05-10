@@ -1,7 +1,10 @@
 #include "main.h"
 #include "queue.h"
-#include "simulator.h"
+#include "event.h"
 #include "messenger.h"
+#include "RaymondTree.h"
+#include "site.h"
+#include "simulator.h"
 
 Messenger::Messenger (Simulator * s):
     wd_size(8)
@@ -11,6 +14,7 @@ Messenger::Messenger (Simulator * s):
 
     //weighted time delays, the index corresponds to the delay
     int wd[8] = {0, 300, 300, 200, 100, 50, 25, 25};
+    weighted_delays = new int[8];
     for (int i = 0; i < wd_size; i++) {
         weighted_delays[i] = wd[i];
     }
@@ -18,9 +22,14 @@ Messenger::Messenger (Simulator * s):
     srand(time(NULL));
 }
 
-void Messenger::send (int site, int action) {
+void Messenger::send (int to, int from, int action) {
+    if (to == from) {
+        cout << "are you insane? you're sending a message to yourself. ignoring reuqest" << endl;
+        return;
+    }
+
     int time = s->get_current_time() + compute_delivery_delay();
-    s->new_event(time, site, action);
+    s->new_event(time, to, from, action);
 }
 
 int Messenger::compute_delivery_delay () {

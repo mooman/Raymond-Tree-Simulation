@@ -1,5 +1,9 @@
 #include "main.h"
 #include "queue.h"
+#include "event.h"
+#include "messenger.h"
+#include "RaymondTree.h"
+#include "site.h"
 #include "simulator.h"
 
 using namespace std;
@@ -23,6 +27,6 @@ int main (int argc, char ** argv) {
         s->new_event(line);
     }
 
-    s->start();
+//    s->start();
     return 0;
 }

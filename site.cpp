@@ -1,17 +1,84 @@
+#include "main.h"
 #include "event.h"
-#include "site.h"
+#include "queue.h"
+#include "messenger.h"
 #include "RaymondTree.h"
+#include "site.h"
+#include "simulator.h"
 
-Site::Site(RaymondTree* tr) {
-	tree_ptr = tr;
+Site::Site(RaymondTree* tr, Simulator * s, Messenger * m) {
+	this->tree_ptr = tr;
+    this->m = m;
+    this->s = s;
+
+    request_q = new Queue();
+
+    executing_cs = false;
 }
 
+void Site::process_token_request (Event * e) {
+    //do I have the token? am i using it?
+    if (this->holder == this->site_id && !executing_cs) {
+        //if i have the token, and im not using it,
+        //it follows that the request queue must be empty
+        //send the token or execute cs if it's me wanting
+
+        if (!request_q->empty()) {
+            cout << "AHHHH!! queue not empty!" << endl;
+        }
+
+        if (e->get_from() == this->site_id) {
+            //if the from request is from THIS site, then i want to execute
+            //execute CS
+        } else {
+            m->send(e->get_from(), this->site_id, ACTION_TOKEN_GRANTED);
+            //point my holder there
+            this->holder =  e->get_from();
+        }
+
+        return;
+    } else {
+        //any prior requests?
+        if (request_q->empty()) {
+            //if request queue is empty, it means i haven't sent a request yet
+            //but i dont have token, so forward request
+            m->send(this->holder, this->site_id, ACTION_TOKEN_REQUEST);
+        }
+    }
+
+    request_q->enqueue(e);
+}
+
+void Site::process_token_received () {
+    //request queue cant be empty, a token would not be granted
+    //if there wasn't a request
+    Event * e = (Event *) request_q->dequeue();
+
+    if (e->get_from() == this->site_id) {
+        //hey! i requested it!
+        //execute cs
+    } else {
+        m->send(e->get_from(), this->site_id, ACTION_TOKEN_GRANTED);
+        if (!request_q->empty()) {
+            m->send(e->get_from(), this->site_id, ACTION_TOKEN_REQUEST);
+        }
+    }
+
+    //this could be THIS site, or the site it sent token to
+    this->holder = e->get_from();
+}
+
+void Site::execute_cs () {
+    executing_cs = true;
+}
+
+/*
 void Site::request() {
 	// request for a critical section
 	//if (request_q is empty && !token) {
 		// send request message to parent
-		Request* m_request = new Request(this->id);
-		this->holder->process_request(m_request);
+//		Request* m_request = new Request(this->id);
+//		this->holder->process_request(m_request);
 
 		// add request to own request_q
 		// request_q.add(r);
@@ -49,6 +116,7 @@ void Site::send_token() {
 	this->token = true;
 	this->receive_token();
 }
+
 
 void Site::receive_token() {
 	// token received, delete top entry from request_q
@@ -102,19 +170,17 @@ void Site::execute_cs() {
 	//}
 	// exit(0); // we're done
 }
+*/
 
 void Site::process_event (Event * e) {
     switch (e->get_action()) {
         case ACTION_TOKEN_REQUEST:
-            m->send(e->get_site(), ACTION_TOKEN_REQUEST);
-            //ask the site what it wants to do with the event
+            //figures out what to do with the request
+            //default request of CS uses this case too.
+            process_token_request(e);
             break;
         case ACTION_TOKEN_GRANTED:
-            //ask the site what it wants to do with the event
-            break;
-        case ACTION_REQ_DELIVERED:
-            break;
-        case ACTION_TOK_DELIVERED:
+            process_token_received();
             break;
         default:
             break;
