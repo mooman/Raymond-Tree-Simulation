@@ -35,30 +35,39 @@ void RaymondTree::build_tree(int size){
 	for (int i = 0; i < size; i++) {
 		random_number = rand() % 50;
 		cout << "DEBUG: node id: " << random_number << endl;
-		root_site = insert_node(root_site, random_number);
+		root_site = insert_node(root_site, random_number, NULL);
 	}
-
+	// debug I/O
 	print_tree(root_site);
+	cout << "tree size: " << tree_size << endl;
 }
 
 // do an insertion into the tree creating
 // something similar to a binary tree
-Site* RaymondTree::insert_node(Site* node, int data){
+Site* RaymondTree::insert_node(Site* node, int data, Site* p_node){
 	// if it's the first time, input site will
 	// be the root site
 	if (node == NULL) {
-		node = new Site();
+		node = new Site(this);
 		node->id = data;
 		node->left = NULL;
 		node->right = NULL;
+
+		if (tree_size == 0) {// root node
+			tree_size += 1;
+			node->holder = node; // make it it's own parent
+		}
+
+		node->holder = p_node; // point to the parent site
+		tree_size++;
 		return node;
 	}
-
+	// recursive insert
 	if (data < node->id ) {
-		node->left = insert_node(node->left, data);
+		node->left = insert_node(node->left, data, node);
 	}
 	else {
-		node->right = insert_node(node->right, data);
+		node->right = insert_node(node->right, data, node);
 	}
 
 	return node;

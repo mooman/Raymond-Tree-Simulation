@@ -35,21 +35,7 @@ void Simulator::start () {
     for (i = 0; i < max_time; i++) {
         while (!timeline[i].empty()) {
             e = (Event *) timeline[i].dequeue();
-            switch (e->get_action()) {
-                case ACTION_TOKEN_REQUEST:
-                    m->send(e->get_site(), ACTION_TOKEN_REQUEST);
-                    //ask the site what it wants to do with the event
-                    break;
-                case ACTION_TOKEN_GRANTED:
-                    //ask the site what it wants to do with the event
-                    break;
-                case ACTION_REQ_DELIVERED:
-                    break;
-                case ACTION_TOK_DELIVERED:
-                    break;
-                default:
-                    break;
-            }
+            site[e->get_site()].process_event(e);
         }
     }
 }

@@ -11,7 +11,7 @@ public:
 	void set_root(Site* s);
 	Site* get_root();
 	void print_tree(Site* node);
-	Site* insert_node(Site* node, int data);
+	Site* insert_node(Site* node, int data, Site* p_node);
 	virtual ~RaymondTree();
 
 private:
