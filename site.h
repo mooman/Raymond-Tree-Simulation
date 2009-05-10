@@ -16,11 +16,13 @@ class Site {
         void process_token_request (Event *);
         void process_token_received ();
         void execute_cs ();
+        void release_cs ();
 
         //id for tree construction
         int id;
         //id based on user input
         int site_id;
+        int holder;
 
         // pointer to the parent site
         Site* parent;
@@ -35,7 +37,6 @@ class Site {
         Simulator * s;
 
         bool executing_cs;
-        int holder;
 };
 
 #endif /*SITE_H_*/

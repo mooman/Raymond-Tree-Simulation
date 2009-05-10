@@ -8,7 +8,7 @@
 
 Simulator::Simulator (int ns, int mt) {
     nsites = ns;
-    max_time = mt;
+    max_time = mt * 100;
     current_time = 0;
 
     timeline = new Queue[max_time];
@@ -19,8 +19,9 @@ Simulator::Simulator (int ns, int mt) {
     rt->build_tree(nsites);
     rt->traverse(rt->get_root());
 
+    int i;
     s = new Site *[nsites];
-    for (int i = 0; i < nsites; i++) {
+    for (i = 0; i < nsites; i++) {
         if (rt->postorder_q->empty()) {
             cout << "tree is empty prematurely" << endl;
         }
@@ -29,10 +30,20 @@ Simulator::Simulator (int ns, int mt) {
         //set Site properties based on the simulator
         s[i]->site_id = i;
     }
-
     if (!rt->postorder_q->empty()) {
         cout << "tree is not yet empty" << endl;
     }
+
+
+    for (i = 0; i < nsites; i++) {
+        if (s[i]->parent == NULL) {
+            s[i]->holder = s[i]->site_id;
+        } else {
+            s[i]->holder = s[i]->parent->site_id;
+        }
+    }
+
+    holder_status();
 }
 
 int Simulator::get_current_time () {
@@ -49,11 +60,23 @@ void Simulator::new_event (int time, int to, int from, int action) {
     timeline[time].enqueue(e);
 }
 
+//print out current "tree"
+void Simulator::holder_status () {
+    cout << endl << "****** Holder Status ********" << endl;
+    for (int i = 0; i < nsites; i++) {
+        cout << "Site " << i << ": " << s[i]->holder << endl;
+    }
+    cout << "***********************" << endl;
+}
+
 void Simulator::start () {
     int i;
     Event * e;
 
     for (i = current_time = 0; i < max_time; i++, current_time++) {
+        if (timeline[i].empty()) continue;
+
+        cout << "\n\n----------- Time " << current_time << " ----------" << endl;
         while (!timeline[i].empty()) {
             e = (Event *) timeline[i].dequeue();
             s[e->get_site()]->process_event(e);

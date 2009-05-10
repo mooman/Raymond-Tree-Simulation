@@ -6,9 +6,9 @@
 #include "site.h"
 #include "simulator.h"
 
-using namespace std;
-
 int main (int argc, char ** argv) {
+    srand((unsigned) time(0));
+
     string line;
     int nsites, max_time;
 
@@ -27,6 +27,6 @@ int main (int argc, char ** argv) {
         s->new_event(line);
     }
 
-//    s->start();
+    s->start();
     return 0;
 }

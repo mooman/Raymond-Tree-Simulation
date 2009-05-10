@@ -25,5 +25,5 @@ void * Queue::dequeue () {
 }
 
 bool Queue::empty () {
-    head == NULL;
+    return head == NULL;
 }

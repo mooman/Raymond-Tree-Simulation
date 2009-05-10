@@ -29,17 +29,20 @@ void Site::process_token_request (Event * e) {
 
         if (e->get_from() == this->site_id) {
             //if the from request is from THIS site, then i want to execute
-            //execute CS
+            execute_cs();
         } else {
+            cout << "Site " << this->site_id << ": Queue empty, sending token to site " << e->get_from() << endl;
             m->send(e->get_from(), this->site_id, ACTION_TOKEN_GRANTED);
             //point my holder there
-            this->holder =  e->get_from();
+            this->holder = e->get_from();
         }
 
         return;
     } else {
         //any prior requests?
         if (request_q->empty()) {
+            cout << "Site " << this->site_id << ": Don't have token. Queue empty, sending request to holder " << this->holder << endl;
+
             //if request queue is empty, it means i haven't sent a request yet
             //but i dont have token, so forward request
             m->send(this->holder, this->site_id, ACTION_TOKEN_REQUEST);
@@ -53,23 +56,56 @@ void Site::process_token_received () {
     //request queue cant be empty, a token would not be granted
     //if there wasn't a request
     Event * e = (Event *) request_q->dequeue();
+    cout << "Site " << this->site_id << ": Got token! Forwarding to site " << e->get_from() << endl;
 
     if (e->get_from() == this->site_id) {
         //hey! i requested it!
-        //execute cs
+        cout << "##### That's me!" << endl;
+        execute_cs();
     } else {
         m->send(e->get_from(), this->site_id, ACTION_TOKEN_GRANTED);
         if (!request_q->empty()) {
+            cout << "++++++ Queue is not empty, sending also a request" << endl;
             m->send(e->get_from(), this->site_id, ACTION_TOKEN_REQUEST);
         }
     }
 
     //this could be THIS site, or the site it sent token to
     this->holder = e->get_from();
+
+    s->holder_status();
 }
 
 void Site::execute_cs () {
     executing_cs = true;
+
+    //execution time delay, schedule a release time with the simulator
+    int time_delay = rand() % 10;
+    s->new_event(s->get_current_time() + time_delay, this->site_id, this->site_id, ACTION_RELEASE_CS);
+
+    cout << "Site " << this->site_id << " is executing CS. Will release in +" << time_delay << " unit time" << endl;
+}
+
+void Site::release_cs () {
+    executing_cs = false;
+
+    if (!request_q->empty()) {
+        Event * e = (Event *) request_q->dequeue();
+        cout << "Site " << this->site_id << ": Released CS. Sending token to site " << e->get_from() << endl;
+
+        if (e->get_from() == this->site_id) {
+            //me again
+            execute_cs();
+        } else {
+            m->send(e->get_from(), this->site_id, ACTION_TOKEN_GRANTED);
+            if (!request_q->empty()) {
+                cout << "++++++ Queue is not empty, sending also a request" << endl;
+                m->send(e->get_from(), this->site_id, ACTION_TOKEN_REQUEST);
+            }
+        }
+
+        this->holder = e->get_from();
+    }
 }
 
 /*
@@ -173,16 +209,28 @@ void Site::execute_cs() {
 */
 
 void Site::process_event (Event * e) {
+    cout << "Site " << this->site_id << ": ";
     switch (e->get_action()) {
         case ACTION_TOKEN_REQUEST:
+            if (e->get_from() == this->site_id) {
+                cout << "Wants to enter CS" << endl;
+            } else {
+                cout << "Received request for token from site " << e->get_from() << endl;
+            }
+
             //figures out what to do with the request
             //default request of CS uses this case too.
             process_token_request(e);
             break;
         case ACTION_TOKEN_GRANTED:
+            cout << "Token received from site " << e->get_from() << endl;
             process_token_received();
             break;
+        case ACTION_RELEASE_CS:
+            release_cs();
+            break;
         default:
+            cout << "I dont know this action!" << endl;
             break;
     }
 }

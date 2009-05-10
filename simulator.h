@@ -12,6 +12,7 @@ class Simulator {
         void new_event (string);
         void new_event (int, int, int, int);
         int get_current_time ();
+        void holder_status ();
 
     private:
         Queue * timeline;

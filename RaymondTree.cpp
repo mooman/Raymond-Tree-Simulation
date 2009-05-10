@@ -36,7 +36,6 @@ void RaymondTree::build_tree(int size){
 		return;
 	}
 
-	srand((unsigned)time(0));
 	// generate random IDs for each site based on a seed provided by
 	// the system time
 	for (int i = 0; i < size; i++) {

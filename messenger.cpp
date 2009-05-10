@@ -18,8 +18,6 @@ Messenger::Messenger (Simulator * s):
     for (int i = 0; i < wd_size; i++) {
         weighted_delays[i] = wd[i];
     }
-
-    srand(time(NULL));
 }
 
 void Messenger::send (int to, int from, int action) {
@@ -30,6 +28,8 @@ void Messenger::send (int to, int from, int action) {
 
     int time = s->get_current_time() + compute_delivery_delay();
     s->new_event(time, to, from, action);
+
+    cout << "------ message is scheduled to deliver at time " << time << endl;
 }
 
 int Messenger::compute_delivery_delay () {
