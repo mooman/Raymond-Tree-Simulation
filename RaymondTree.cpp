@@ -40,7 +40,7 @@ void RaymondTree::build_tree(int size){
 	// the system time
 	for (int i = 0; i < size; i++) {
 		random_number = rand() % 50;
-		cout << "DEBUG: node id: " << random_number << endl;
+	//	cout << "DEBUG: node id: " << random_number << endl;
 		root_site = insert_node(root_site, random_number, NULL);
 	}
 	// debug I/O

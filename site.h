@@ -7,22 +7,25 @@ class Site {
     public:
         //constructor
         Site(RaymondTree *, Simulator *, Messenger *);
-//        void request();
-//        void process_request(Request* r);
-//        void send_token();
-//        void receive_token();
-//        void execute_cs();
+
         void process_event (Event *);
         void process_token_request (Event *);
         void process_token_received ();
         void execute_cs ();
         void release_cs ();
+        float average_response_time ();
 
         //id for tree construction
         int id;
         //id based on user input
         int site_id;
         int holder;
+
+        //stats variables
+        int cs_requests;
+        int response_times;
+        Queue * times_request_cs;
+        int time_finish_cs;
 
         // pointer to the parent site
         Site* parent;

@@ -10,6 +10,9 @@ Simulator::Simulator (int ns, int mt) {
     nsites = ns;
     max_time = mt * 100;
     current_time = 0;
+    cs_entries = 0;
+    exit_cs_at = 0;
+    sync_delays = 0;
 
     timeline = new Queue[max_time];
     m = new Messenger(this);
@@ -69,8 +72,17 @@ void Simulator::holder_status () {
     cout << "***********************" << endl;
 }
 
+void Simulator::mark_exit_cs () {
+    exit_cs_at = current_time;
+}
+
+void Simulator::mark_enter_cs () {
+    cs_entries++;
+    sync_delays += current_time - exit_cs_at;
+}
+
 void Simulator::start () {
-    int i;
+    int i, trt, rt = 0;
     Event * e;
 
     for (i = current_time = 0; i < max_time; i++, current_time++) {
@@ -82,4 +94,15 @@ void Simulator::start () {
             s[e->get_site()]->process_event(e);
         }
     }
+
+    cout << "\n\nFinished simulation...... here are some stats:\n" << endl;
+    cout << "Average Response Times: " << endl;
+    for (i = 0; i < nsites; i++) {
+        trt = s[i]->average_response_time();
+        rt += trt;
+        cout << "Site " << i << ": " << trt << endl;
+    }
+    cout << "Overall Average: " << ((float) rt / nsites) << endl;
+
+    cout << "\nAverage Sync Delay: " << ((float) sync_delays / cs_entries) << endl;
 }

@@ -14,6 +14,13 @@ Site::Site(RaymondTree* tr, Simulator * s, Messenger * m) {
     request_q = new Queue();
 
     executing_cs = false;
+
+    //stats init
+    cs_requests = 0;
+    //this will be just a cummative sum,
+    //devide by requests to get average response time
+    response_times = 0;
+    times_request_cs = new Queue();
 }
 
 void Site::process_token_request (Event * e) {
@@ -22,11 +29,6 @@ void Site::process_token_request (Event * e) {
         //if i have the token, and im not using it,
         //it follows that the request queue must be empty
         //send the token or execute cs if it's me wanting
-
-        if (!request_q->empty()) {
-            cout << "AHHHH!! queue not empty!" << endl;
-        }
-
         if (e->get_from() == this->site_id) {
             //if the from request is from THIS site, then i want to execute
             execute_cs();
@@ -46,6 +48,8 @@ void Site::process_token_request (Event * e) {
             //if request queue is empty, it means i haven't sent a request yet
             //but i dont have token, so forward request
             m->send(this->holder, this->site_id, ACTION_TOKEN_REQUEST);
+        } else {
+            cout << "Site " << this->site_id << ": Already sent a token request, queue this one." << endl;
         }
     }
 
@@ -84,6 +88,7 @@ void Site::execute_cs () {
     s->new_event(s->get_current_time() + time_delay, this->site_id, this->site_id, ACTION_RELEASE_CS);
 
     cout << "Site " << this->site_id << " is executing CS. Will release in +" << time_delay << " unit time" << endl;
+    s->mark_enter_cs();
 }
 
 void Site::release_cs () {
@@ -106,107 +111,20 @@ void Site::release_cs () {
 
         this->holder = e->get_from();
     }
+
+    //set simulator know we're done with CS, for stats
+    s->mark_exit_cs();
+
+    int *tr = (int *) times_request_cs->dequeue();
+    time_finish_cs = s->get_current_time();
+    response_times += time_finish_cs - *tr;
+    delete(tr);
 }
 
-/*
-void Site::request() {
-	// request for a critical section
-	//if (request_q is empty && !token) {
-		// send request message to parent
-//		Request* m_request = new Request(this->id);
-//		this->holder->process_request(m_request);
-
-		// add request to own request_q
-		// request_q.add(r);
-	//}
+float Site::average_response_time () {
+    if (cs_requests == 0) return 0;
+    return ((float) response_times / cs_requests);
 }
-
-void Site::process_request(Request* r) {
-	// first check to see if I'm the root site
-	if (this->token == true) {
-		// I am!
-		// send the token to the site that
-		// requested it
-		this->token = false;
-		if (r->site_id == this->left->id) {
-			// it came from the left side
-			this->left->send_token();
-		}
-		else {
-			// it must have come from the right
-			this->right->send_token();
-		}
-	}
-	else {
-		// place the request in the request q
-		// request_q.add(r);
-		// send request to parent provided this
-		// request is not already in queue
-		//if (request_q.find(r) == 0) {
-			this->holder->process_request(r);
-		//}
-	}
-}
-
-void Site::send_token() {
-	this->token = true;
-	this->receive_token();
-}
-
-
-void Site::receive_token() {
-	// token received, delete top entry from request_q
-	// and send token to the site in this entry
-	 Request* r;// = request_q.top();
-	 if (r->site_id == this->id) {
-		 // set holder variable to point to self
-		 this->holder = this;
-		 // execute CS
-		 execute_cs();
-	 }
-	 else if (r->site_id == this->left->id) {
-		 this->holder = this->left;
-		 this->left->send_token();
-	 }
-	 else {
-		 this->holder = this->right;
-		 this->right->send_token();
-	 }
-	 // in all cases, at this point we've released the token
-	 this->token = false;
-}
-
-void Site::execute_cs() {
-	// simulate enter CS
-	// ...
-	// simulate exit CS
-	// 1. check request_q, if non empty delete top entry from it
-	// send the token to that site and set holder variable to
-	// point to that site
-	//if (request_q.size() != 0) {
-		// request_q.pop;
-		//if (r->site_id == this->left->id) {
-			this->holder = this->left;
-			this->left->send_token();
-		//}
-		//else {
-			this->holder = this->right;
-			this->right->send_token();
-		//}
-	//}
-
-	// 2. If the request_q is nonempty at this point, then the
-	// site sends a REQUEST message to the site which is pointed
-	// at by the holder variable.
-	// if (request_q.size() != 0) {
-		//this->holder->process_request(r);
-	//}
-	//else {
-			tree_ptr->set_root(this);
-	//}
-	// exit(0); // we're done
-}
-*/
 
 void Site::process_event (Event * e) {
     cout << "Site " << this->site_id << ": ";
@@ -214,6 +132,11 @@ void Site::process_event (Event * e) {
         case ACTION_TOKEN_REQUEST:
             if (e->get_from() == this->site_id) {
                 cout << "Wants to enter CS" << endl;
+
+                cs_requests++;
+                int * tr = new int;
+                *tr = s->get_current_time();
+                times_request_cs->enqueue(tr);
             } else {
                 cout << "Received request for token from site " << e->get_from() << endl;
             }
@@ -227,6 +150,7 @@ void Site::process_event (Event * e) {
             process_token_received();
             break;
         case ACTION_RELEASE_CS:
+            cout << "Finishes executing CS" << endl;
             release_cs();
             break;
         default:
