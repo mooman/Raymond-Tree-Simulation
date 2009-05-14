@@ -1,17 +1,19 @@
 #include "main.h"
 #include "event.h"
+#include "Request.h"
 
 Event::Event(string line) {
-    time, site, from, action = NULL;
+    time, site, from, action, request = NULL;
 
     parse(line);
 }
 
-Event::Event(int t, int s, int f, int a) {
+Event::Event(int t, int s, int f, int a, Request* r) {
     time = t;
     site = s;
     from = f;
     action = a;
+    request = r;
 }
 
 //accessors

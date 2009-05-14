@@ -3,6 +3,7 @@
 
 //forward declaration
 class Messenger;
+class Request;
 
 class Simulator {
     public:
@@ -10,7 +11,7 @@ class Simulator {
 
         void start ();
         void new_event (string);
-        void new_event (int, int, int, int);
+        void new_event (int, int, int, int, Request*);
         int get_current_time ();
         void holder_status ();
         void mark_enter_cs ();

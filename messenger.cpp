@@ -20,14 +20,15 @@ Messenger::Messenger (Simulator * s):
     }
 }
 
-void Messenger::send (int to, int from, int action) {
+void Messenger::send (int to, int from, int action, Request* req) {
+	// this shouldn't happen
     if (to == from) {
-        cout << "are you insane? you're sending a message to yourself. ignoring reuqest" << endl;
+        cout << "you're sending a message to yourself. ignoring reuqest" << endl;
         return;
     }
 
     int time = s->get_current_time() + compute_delivery_delay();
-    s->new_event(time, to, from, action);
+    s->new_event(time, to, from, action, req);
 
     cout << "------ message is scheduled to deliver at time " << time << endl;
 }

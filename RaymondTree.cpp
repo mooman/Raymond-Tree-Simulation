@@ -45,7 +45,7 @@ void RaymondTree::build_tree(int size){
 	}
 	// debug I/O
 	print_tree(root_site);
-	cout << "tree size: " << tree_size << endl;
+	cout << "tree size: " << tree_size-1 << endl;
 }
 
 // do an insertion into the tree creating

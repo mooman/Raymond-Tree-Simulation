@@ -5,14 +5,15 @@
 #include "RaymondTree.h"
 #include "site.h"
 #include "simulator.h"
+#include "Request.h"
+#include "MessageTracker.h"
 
 Site::Site(RaymondTree* tr, Simulator * s, Messenger * m) {
-	this->tree_ptr = tr;
+    this->tree_ptr = tr;
     this->m = m;
     this->s = s;
 
     request_q = new Queue();
-
     executing_cs = false;
 
     //stats init
@@ -23,7 +24,7 @@ Site::Site(RaymondTree* tr, Simulator * s, Messenger * m) {
     times_request_cs = new Queue();
 }
 
-void Site::process_token_request (Event * e) {
+void Site::process_token_request (Event* e) {
     //do I have the token? am i using it?
     if (this->holder == this->site_id && !executing_cs) {
         //if i have the token, and im not using it,
@@ -34,7 +35,9 @@ void Site::process_token_request (Event * e) {
             execute_cs();
         } else {
             cout << "Site " << this->site_id << ": Queue empty, sending token to site " << e->get_from() << endl;
-            m->send(e->get_from(), this->site_id, ACTION_TOKEN_GRANTED);
+            if (e->request != NULL)
+                e->request->num_messages++;
+            m->send(e->get_from(), this->site_id, ACTION_TOKEN_GRANTED, e->request);
             //point my holder there
             this->holder = e->get_from();
         }
@@ -47,7 +50,9 @@ void Site::process_token_request (Event * e) {
 
             //if request queue is empty, it means i haven't sent a request yet
             //but i dont have token, so forward request
-            m->send(this->holder, this->site_id, ACTION_TOKEN_REQUEST);
+            if (e->request != NULL)
+                e->request->num_messages++;
+            m->send(this->holder, this->site_id, ACTION_TOKEN_REQUEST, e->request);
         } else {
             cout << "Site " << this->site_id << ": Already sent a token request, queue this one." << endl;
         }
@@ -67,10 +72,10 @@ void Site::process_token_received () {
         cout << "##### That's me!" << endl;
         execute_cs();
     } else {
-        m->send(e->get_from(), this->site_id, ACTION_TOKEN_GRANTED);
+        m->send(e->get_from(), this->site_id, ACTION_TOKEN_GRANTED, e->request);
         if (!request_q->empty()) {
             cout << "++++++ Queue is not empty, sending also a request" << endl;
-            m->send(e->get_from(), this->site_id, ACTION_TOKEN_REQUEST);
+            m->send(e->get_from(), this->site_id, ACTION_TOKEN_REQUEST, e->request);
         }
     }
 
@@ -85,7 +90,7 @@ void Site::execute_cs () {
 
     //execution time delay, schedule a release time with the simulator
     int time_delay = rand() % 10;
-    s->new_event(s->get_current_time() + time_delay, this->site_id, this->site_id, ACTION_RELEASE_CS);
+    s->new_event(s->get_current_time() + time_delay, this->site_id, this->site_id, ACTION_RELEASE_CS, NULL);
 
     cout << "Site " << this->site_id << " is executing CS. Will release in +" << time_delay << " unit time" << endl;
     s->mark_enter_cs();
@@ -102,10 +107,10 @@ void Site::release_cs () {
             //me again
             execute_cs();
         } else {
-            m->send(e->get_from(), this->site_id, ACTION_TOKEN_GRANTED);
+            m->send(e->get_from(), this->site_id, ACTION_TOKEN_GRANTED, NULL);
             if (!request_q->empty()) {
                 cout << "++++++ Queue is not empty, sending also a request" << endl;
-                m->send(e->get_from(), this->site_id, ACTION_TOKEN_REQUEST);
+                m->send(e->get_from(), this->site_id, ACTION_TOKEN_REQUEST, e->request);
             }
         }
 
@@ -126,17 +131,28 @@ float Site::average_response_time () {
     return ((float) response_times / cs_requests);
 }
 
-void Site::process_event (Event * e) {
+void Site::process_event (Event* e) {
     cout << "Site " << this->site_id << ": ";
     switch (e->get_action()) {
         case ACTION_TOKEN_REQUEST:
             if (e->get_from() == this->site_id) {
                 cout << "Wants to enter CS" << endl;
-
                 cs_requests++;
-                int * tr = new int;
+                int* tr = new int;
                 *tr = s->get_current_time();
                 times_request_cs->enqueue(tr);
+
+                // see if this request was made before
+                // if so, we don't want to create a new one
+                Request* mRequest = MessageTracker::getInstance()->find(this->site_id);
+                if (mRequest == NULL) {
+                    mRequest = new Request(this->site_id);
+                    MessageTracker::getInstance()->add(mRequest);
+                    mRequest->num_messages++; // this step will always result in at least
+                                              // one message being sent
+                    e->request = mRequest;
+                }
+
             } else {
                 cout << "Received request for token from site " << e->get_from() << endl;
             }

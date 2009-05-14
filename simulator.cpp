@@ -5,6 +5,7 @@
 #include "RaymondTree.h"
 #include "site.h"
 #include "simulator.h"
+#include "MessageTracker.h"
 
 Simulator::Simulator (int ns, int mt) {
     nsites = ns;
@@ -28,7 +29,7 @@ Simulator::Simulator (int ns, int mt) {
         if (rt->postorder_q->empty()) {
             cout << "tree is empty prematurely" << endl;
         }
-        s[i] = (Site *) rt->postorder_q->dequeue();
+        s[i] = (Site*) rt->postorder_q->dequeue();
 
         //set Site properties based on the simulator
         s[i]->site_id = i;
@@ -36,7 +37,6 @@ Simulator::Simulator (int ns, int mt) {
     if (!rt->postorder_q->empty()) {
         cout << "tree is not yet empty" << endl;
     }
-
 
     for (i = 0; i < nsites; i++) {
         if (s[i]->parent == NULL) {
@@ -54,12 +54,12 @@ int Simulator::get_current_time () {
 }
 
 void Simulator::new_event (string line) {
-    Event * e = new Event(line);
+    Event* e = new Event(line);
     timeline[e->get_time()].enqueue(e);
 }
 
-void Simulator::new_event (int time, int to, int from, int action) {
-    Event * e = new Event(time, to, from, action);
+void Simulator::new_event (int time, int to, int from, int action, Request* r) {
+    Event* e = new Event(time, to, from, action, r);
     timeline[time].enqueue(e);
 }
 
@@ -83,7 +83,7 @@ void Simulator::mark_enter_cs () {
 
 void Simulator::start () {
     int i, trt, rt = 0;
-    Event * e;
+    Event* e;
 
     for (i = current_time = 0; i < max_time; i++, current_time++) {
         if (timeline[i].empty()) continue;
@@ -105,4 +105,7 @@ void Simulator::start () {
     cout << "Overall Average: " << ((float) rt / nsites) << endl;
 
     cout << "\nAverage Sync Delay: " << ((float) sync_delays / cs_entries) << endl;
+
+    cout << "Messages per site: " << endl;
+    MessageTracker::getInstance()->print_messages();
 }
