@@ -1,3 +1,16 @@
-to compile, do:
+To run under:
 
-make
+    Unix
+        1. make
+        2. rts < input_file
+
+    Windows
+        1. rts.exe < input_file
+
+To generate random input:
+
+    Unix/Windows
+        1. get ruby
+        2. ruby input_generator.rb <number of sites> <time span> <number of requests in that time span>
+        3. redirect the output to a file or directly to the program
+            - ruby input_generator.rb 10 100 23 | rts

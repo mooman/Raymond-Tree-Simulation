@@ -26,18 +26,13 @@ Simulator::Simulator (int ns, int mt) {
     int i;
     s = new Site *[nsites];
     for (i = 0; i < nsites; i++) {
-        if (rt->postorder_q->empty()) {
-            cout << "tree is empty prematurely" << endl;
-        }
         s[i] = (Site*) rt->postorder_q->dequeue();
 
         //set Site properties based on the simulator
         s[i]->site_id = i;
     }
-    if (!rt->postorder_q->empty()) {
-        cout << "tree is not yet empty" << endl;
-    }
 
+    //set the holder variables
     for (i = 0; i < nsites; i++) {
         if (s[i]->parent == NULL) {
             s[i]->holder = s[i]->site_id;
@@ -85,6 +80,7 @@ void Simulator::start () {
     int i, trt, rt = 0;
     Event* e;
 
+    //start main loop
     for (i = current_time = 0; i < max_time; i++, current_time++) {
         if (timeline[i].empty()) continue;
 
@@ -95,6 +91,7 @@ void Simulator::start () {
         }
     }
 
+    //stats
     cout << "\n\nFinished simulation...... here are some stats:\n" << endl;
     cout << "Average Response Times: " << endl;
     for (i = 0; i < nsites; i++) {
